@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Snake - Glassmorphism</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #2c3e50; color: white; font-family: 'Segoe UI', sans-serif; flex-direction: column; overflow: hidden; }
+        canvas { border: 5px solid #ecf0f1; box-shadow: 0 0 20px rgba(0,0,0,0.5); background-color: #000; border-radius: 8px; }
+        h1 { margin-bottom: 10px; font-weight: 300; }
+        #main-header { position: absolute; top: 0; width: 100%; color: white; padding: 15px 0; z-index: 10; }
+        #main-header .header-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        #main-header nav ul { display: flex; list-style: none; gap: 30px; margin: 0; padding: 0; }
+        #main-header nav a { color: white; text-decoration: none; font-size: 16px; transition: color 0.3s ease; }
+        #main-header nav a:hover { color: #4CAF50; }
+        #modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; }
+        .glass-modal { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: 40px; text-align: center; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); width: 300px; }
+        .glass-modal h2 { margin-top: 0; color: #fff; font-size: 2rem; }
+        .glass-modal p { font-size: 1.2rem; margin-bottom: 20px; }
+        .btn-container { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .btn-restart, .btn-valentine { color: white; border: none; padding: 12px 25px; border-radius: 50px; font-size: 1rem; cursor: pointer; transition: transform 0.2s, background 0.3s; width: 200px; text-decoration: none; }
+        .btn-restart { background: #2ecc71; }
+        .btn-restart:hover { background: #27ae60; transform: scale(1.05); }
+        .btn-valentine { background: #e74c3c; display: inline-block; }
+        .btn-valentine:hover { background: #c0392b; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <div id="modal-overlay">
+        <div class="glass-modal">
+            <h2>GAME OVER</h2>
+            <p>Score: <span id="finalScore">0</span></p>
+            <div class="btn-container">
+                <a href="willubemyvalentine.html" class="btn-valentine">pls click me</a>
+            </div>
+        </div>
+    </div>
+    <header id="main-header">
+        <div class="header-container">
+            <div class="header-title">Snake Game</div>
+            <nav>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Gallery</a></li>
+                    <li><a href="#">Ambition</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <h1>Score: <span id="score">0</span></h1>
+    <canvas id="snakeGame" width="400" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById("snakeGame");
+        const ctx = canvas.getContext("2d");
+        const scoreElement = document.getElementById("score");
+        const modal = document.getElementById("modal-overlay");
+        const finalScoreText = document.getElementById("finalScore");
+        const box = 20; 
+        let score = 0;
+        let gameSpeed = 130;
+        let snake = [{ x: 10 * box, y: 10 * box }];
+        let food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
+        let d = "RIGHT";
+        document.addEventListener("keydown", direction);
+        function direction(event) {
+            if(event.keyCode == 37 && d != "RIGHT") d = "LEFT";
+            else if(event.keyCode == 38 && d != "DOWN") d = "UP";
+            else if(event.keyCode == 39 && d != "LEFT") d = "RIGHT";
+            else if(event.keyCode == 40 && d != "UP") d = "DOWN";
+        }
+        function collision(head, array) {
+            for(let i = 0; i < array.length; i++) {
+                if(head.x == array[i].x && head.y == array[i].y) return true;
+            }
+            return false;
+        }
+        function draw() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            for(let i = 0; i < snake.length; i++) {
+                ctx.fillStyle = (i == 0) ? "#2ecc71" : "#27ae60";
+                ctx.fillRect(snake[i].x, snake[i].y, box, box);
+                ctx.strokeStyle = "black";
+                ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+            }
+            ctx.fillStyle = "#e74c3c";
+            ctx.fillRect(food.x, food.y, box, box);
+            let snakeX = snake[0].x;
+            let snakeY = snake[0].y;
+            if( d == "LEFT") snakeX -= box;
+            if( d == "UP") snakeY -= box;
+            if( d == "RIGHT") snakeX += box;
+            if( d == "DOWN") snakeY += box;
+            if(snakeX == food.x && snakeY == food.y) {
+                score++;
+                scoreElement.innerHTML = score;
+                food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
+            } else {
+                snake.pop(); 
+            }
+            let newHead = { x: snakeX, y: snakeY };
+            if(snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+                clearInterval(game);
+                finalScoreText.innerText = score;
+                modal.style.display = "flex";
+                return;
+            }
+            snake.unshift(newHead); 
+        }
+        let game = setInterval(draw, gameSpeed);
+    </script>
+</body>
+</html>
