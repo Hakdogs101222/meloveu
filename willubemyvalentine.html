@@ -34,17 +34,24 @@
         let clickCount = 0;
 
         function moveNoButton() {
-            // Ensure button never goes out of bounds
-            const maxX = Math.max(0, window.innerWidth - noBtn.offsetWidth);
-            const maxY = Math.max(0, window.innerHeight - noBtn.offsetHeight);
+    // Get button dimensions to ensure it stays fully inside
+    const btnRect = noBtn.getBoundingClientRect();
+    const btnWidth = btnRect.width;
+    const btnHeight = btnRect.height;
 
-            const randomX = Math.floor(Math.random() * (maxX + 1));
-            const randomY = Math.floor(Math.random() * (maxY + 1));
+    // Calculate max possible positions (Window size - Button size - small padding)
+    const maxX = window.innerWidth - btnWidth - 20;
+    const maxY = window.innerHeight - btnHeight - 20;
 
-            noBtn.style.position = 'fixed';
-            noBtn.style.left = `${randomX}px`;
-            noBtn.style.top = `${randomY}px`;
-        }
+    // Ensure we don't get negative numbers on very small screens
+    const randomX = Math.max(10, Math.floor(Math.random() * maxX));
+    const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+
+    noBtn.style.position = 'fixed';
+    noBtn.style.left = `${randomX}px`;
+    noBtn.style.top = `${randomY}px`;
+    noBtn.style.margin = '0'; // Remove any default centering margins
+}
 
         // Logic for 5 clicks
         noBtn.addEventListener('click', (e) => {
@@ -98,3 +105,4 @@
     </script>
 </body>
 </html>
+
