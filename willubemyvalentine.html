@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Will U Be My Valentine?</title>
+    <style>
+        body { margin: 0; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: url('download.jpg') no-repeat center center fixed; background-size: cover; font-family: 'Segoe UI', sans-serif; overflow: hidden; text-align: center; touch-action: none; }
+        .container { background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); padding: 40px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); z-index: 2; width: 85%; max-width: 350px; position: relative; }
+        h1 { color: #d63031; font-size: 1.8rem; margin-bottom: 20px; text-shadow: 1px 1px white; }
+        .buttons { display: flex; gap: 20px; justify-content: center; align-items: center; min-height: 80px; }
+        .btn { padding: 12px 28px; font-size: 1.1rem; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; }
+        #yesBtn { background-color: #2ecc71; color: white; display: none; }
+        /* Smooth transition so you see the button move instead of vanish */
+        #noBtn { background-color: #e74c3c; color: white; position: absolute; transition: all 0.3s ease-out; white-space: nowrap; z-index: 100; }
+        .gif-container { margin-bottom: 15px; font-size: 3.5rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="gif-container" id="mainEmoji">❤️</div>
+        <h1 id="questionText">Will you be my Valentine?</h1>
+        <div class="buttons">
+            <button id="yesBtn" class="btn" onclick="celebrate()">Yes</button>
+            <button id="noBtn" class="btn">No</button>
+        </div>
+    </div>
+
+    <script>
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const questionText = document.getElementById('questionText');
+        const mainEmoji = document.getElementById('mainEmoji');
+        let clickCount = 0;
+
+        function moveNoButton() {
+            // Ensure button never goes out of bounds
+            const maxX = Math.max(0, window.innerWidth - noBtn.offsetWidth);
+            const maxY = Math.max(0, window.innerHeight - noBtn.offsetHeight);
+
+            const randomX = Math.floor(Math.random() * (maxX + 1));
+            const randomY = Math.floor(Math.random() * (maxY + 1));
+
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = `${randomX}px`;
+            noBtn.style.top = `${randomY}px`;
+        }
+
+        // Logic for 5 clicks
+        noBtn.addEventListener('click', (e) => {
+            clickCount++;
+            if (clickCount >= 5) {
+                noBtn.style.display = 'none';
+                yesBtn.style.display = 'inline-block';
+                questionText.innerText = "Okay, fine! Click Yes? ❤️";
+                mainEmoji.innerText = "🥺";
+            } else {
+                moveNoButton();
+            }
+        });
+
+        // Move on hover (Desktop)
+        noBtn.addEventListener('mouseover', moveNoButton);
+        
+        // Move on tap (Mobile)
+        noBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); 
+            moveNoButton();
+        });
+
+        function celebrate() {
+            document.querySelector('.container').innerHTML = `
+                <div class="gif-container">🥰</div>
+                <h1>Yay! See you then! ❤️</h1>
+                <p style="color: #d63031; font-weight: bold;">I knew you'd say yes!</p>
+            `;
+            confetti();
+        }
+
+        function confetti() {
+            for(let i=0; i<40; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '❤️';
+                heart.style.position = 'fixed';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.top = '100vh';
+                heart.style.fontSize = (Math.random() * 15 + 15) + 'px';
+                heart.style.zIndex = '1000';
+                heart.style.transition = `transform ${Math.random() * 2 + 2}s linear, top ${Math.random() * 2 + 2}s linear`;
+                document.body.appendChild(heart);
+                setTimeout(() => {
+                    heart.style.top = '-10vh';
+                    heart.style.transform = `translateX(${Math.random() * 100 - 50}px) rotate(${Math.random() * 360}deg)`;
+                }, 50);
+                setTimeout(() => heart.remove(), 4000);
+            }
+        }
+    </script>
+</body>
+</html>
