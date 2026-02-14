@@ -11,8 +11,8 @@
         .buttons { display: flex; gap: 20px; justify-content: center; align-items: center; min-height: 80px; }
         .btn { padding: 12px 28px; font-size: 1.1rem; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; }
         #yesBtn { background-color: #2ecc71; color: white; display: none; }
-        /* Smooth transition so you see the button move instead of vanish */
-        #noBtn { background-color: #e74c3c; color: white; position: absolute; transition: all 0.3s ease-out; white-space: nowrap; z-index: 100; }
+        /* Instant teleport: removed transition for maximum difficulty */
+        #noBtn { background-color: #e74c3c; color: white; position: absolute; white-space: nowrap; z-index: 100; }
         .gif-container { margin-bottom: 15px; font-size: 3.5rem; }
     </style>
 </head>
@@ -32,29 +32,34 @@
         const questionText = document.getElementById('questionText');
         const mainEmoji = document.getElementById('mainEmoji');
         let clickCount = 0;
+        let lastSpotIndex = -1;
+
+        // Scripted safe locations (X/Y as viewport percentages)
+        const scriptedSpots = [
+            { x: 10, y: 10 }, { x: 75, y: 10 },
+            { x: 10, y: 80 }, { x: 75, y: 80 },
+            { x: 45, y: 15 }, { x: 45, y: 85 },
+            { x: 20, y: 50 }, { x: 70, y: 50 }
+        ];
 
         function moveNoButton() {
-    // Get button dimensions to ensure it stays fully inside
-    const btnRect = noBtn.getBoundingClientRect();
-    const btnWidth = btnRect.width;
-    const btnHeight = btnRect.height;
+            let randomIndex;
+            // Prevent teleporting to the same spot twice in a row
+            do {
+                randomIndex = Math.floor(Math.random() * scriptedSpots.length);
+            } while (randomIndex === lastSpotIndex);
+            
+            lastSpotIndex = randomIndex;
+            const spot = scriptedSpots[randomIndex];
 
-    // Calculate max possible positions (Window size - Button size - small padding)
-    const maxX = window.innerWidth - btnWidth - 20;
-    const maxY = window.innerHeight - btnHeight - 20;
+            // Apply teleport
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = `${spot.x}vw`;
+            noBtn.style.top = `${spot.y}vh`;
+            noBtn.style.transform = 'none'; // Clear centering
+        }
 
-    // Ensure we don't get negative numbers on very small screens
-    const randomX = Math.max(10, Math.floor(Math.random() * maxX));
-    const randomY = Math.max(10, Math.floor(Math.random() * maxY));
-
-    noBtn.style.position = 'fixed';
-    noBtn.style.left = `${randomX}px`;
-    noBtn.style.top = `${randomY}px`;
-    noBtn.style.margin = '0'; // Remove any default centering margins
-}
-
-        // Logic for 5 clicks
-        noBtn.addEventListener('click', (e) => {
+        noBtn.addEventListener('click', () => {
             clickCount++;
             if (clickCount >= 5) {
                 noBtn.style.display = 'none';
@@ -66,10 +71,8 @@
             }
         });
 
-        // Move on hover (Desktop)
+        // Desktop and Mobile triggers
         noBtn.addEventListener('mouseover', moveNoButton);
-        
-        // Move on tap (Mobile)
         noBtn.addEventListener('touchstart', (e) => {
             e.preventDefault(); 
             moveNoButton();
@@ -105,4 +108,3 @@
     </script>
 </body>
 </html>
-
